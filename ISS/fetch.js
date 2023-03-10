@@ -7,13 +7,15 @@ let timeIssLocationFetched = document.querySelector('#time')
 let update = 10000
 let maxfailedAttempts = 3
 
-let issMarker  // Leaflet marker 
+let issMarker  
 let icon = L.icon({
-    iconUrl: 'iss.png',
+    iconUrl: 'iss_icon.png',
     iconSize: [50, 50],
     iconAnchor: [25, 25]
 })
-let map = L.map('iss-map').setView([0, 0], 1)  // Center at 0, 0 and max zoom out
+
+// creat map
+let map = L.map('iss-map').setView([0, 0], 1)  
 
 // Add the tile layer - roads, streets etc. Without this, nothing to see 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -29,9 +31,8 @@ function iss(attempts){
         return
     }
 
-    fetch(url).then((res) => {  
-        return res.json()  // process response into JSON
-    }).then( (issData) => {
+    fetch(url).then( res =>  res.json() )
+        .then( (issData) => {
         console.log(issData) //TODO -Display data on web page
         let lat = issData.latitude
         let long = issData.longitude
@@ -44,19 +45,17 @@ function iss(attempts){
         // create marker
         issMarker = L.marker([lat, long], {icon: icon} ).addTo(map)
        } else {
-        issMarker.setLatLng([lat, long]) // Already exists - move to new location
+        issMarker.setLatLng([lat, long]) 
        }
 
-       // Update the time element to the current date and time 
+       // Update the time and date
        let now = Date()
        timeIssLocationFetched.innerHTML = `This data was fetched as ${now}`
 
     }).catch( (err) =>{
-        attempts --
+        attempts = attempts - 1 // subtract 1 from number of attempts
         console.log('ERROR!', err)
     }).finally( () => {
-        // finally runs whether the fetch() worked or failed.
-        // Call the iss function after a delay of update miliseconds to update the position 
         setTimeout(iss, update, attempts)
     })
 }
